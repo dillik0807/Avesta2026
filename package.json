@@ -1,0 +1,50 @@
+{
+  "name": "warehouse-mobile-app",
+  "version": "1.0.0",
+  "description": "Мобильное приложение для системы учёта товаров",
+  "main": "index.js",
+  "scripts": {
+    "build": "npm run copy-files",
+    "copy-files": "mkdir -p www && cp Untitled.html www/index.html && cp -r assets www/ 2>/dev/null || true",
+    "dev": "npm run copy-files && npx cap run android --livereload",
+    "dev:ios": "npm run copy-files && npx cap run ios --livereload",
+    "android": "npm run build && npx cap sync android && npx cap run android",
+    "ios": "npm run build && npx cap sync ios && npx cap run ios",
+    "sync": "npx cap sync",
+    "sync:android": "npx cap sync android",
+    "sync:ios": "npx cap sync ios",
+    "add:android": "npx cap add android",
+    "add:ios": "npx cap add ios",
+    "open:android": "npx cap open android",
+    "open:ios": "npx cap open ios",
+    "clean": "npx cap clean",
+    "doctor": "npx cap doctor"
+  },
+  "keywords": [
+    "warehouse",
+    "inventory",
+    "mobile",
+    "capacitor",
+    "android",
+    "ios"
+  ],
+  "author": "Warehouse System Team",
+  "license": "MIT",
+  "devDependencies": {
+    "@capacitor/cli": "^5.5.1"
+  },
+  "dependencies": {
+    "@capacitor/android": "^5.5.1",
+    "@capacitor/app": "^5.0.6",
+    "@capacitor/core": "^5.5.1",
+    "@capacitor/device": "^5.0.6",
+    "@capacitor/haptics": "^5.0.6",
+    "@capacitor/ios": "^5.5.1",
+    "@capacitor/keyboard": "^5.0.6",
+    "@capacitor/network": "^5.0.6",
+    "@capacitor/splash-screen": "^5.0.6",
+    "@capacitor/status-bar": "^5.0.6",
+    "@capacitor/storage": "^1.2.5",
+    "@capacitor/toast": "^5.0.6"
+  }
+}

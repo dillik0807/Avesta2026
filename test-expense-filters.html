@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тест фильтров расходов</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-8">
+    <div class="max-w-4xl mx-auto">
+        <h1 class="text-3xl font-bold mb-6">🔍 Тест фильтров расходов</h1>
+        
+        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+            <h2 class="text-lg font-semibold text-blue-800 mb-2">✅ Что было добавлено:</h2>
+            <ul class="text-blue-700 text-sm space-y-1">
+                <li>• Блок фильтров с тремя селекторами (Фирма, Товар, Клиент)</li>
+                <li>• Кнопка "Очистить" для сброса всех фильтров</li>
+                <li>• Счетчик "Показано X из Y записей"</li>
+                <li>• Автоматическое заполнение списков из данных</li>
+                <li>• Мгновенная фильтрация при изменении значений</li>
+                <li>• Адаптивный дизайн для мобильных устройств</li>
+            </ul>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Проверка элементов -->
+            <div class="bg-white p-6 rounded-lg shadow">
+                <h3 class="text-lg font-semibold mb-4">🔧 Проверка элементов</h3>
+                <div class="space-y-3">
+                    <button id="checkElements" class="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700">
+                        Проверить наличие элементов
+                    </button>
+                    <div id="elementsResult" class="text-sm bg-gray-50 p-3 rounded hidden">
+                        <!-- Результат проверки -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Тест функций -->
+            <div class="bg-white p-6 rounded-lg shadow">
+                <h3 class="text-lg font-semibold mb-4">🧪 Тест функций</h3>
+                <div class="space-y-3">
+                    <button id="testFunctions" class="w-full bg-green-600 text-white py-2 rounded hover:bg-green-700">
+                        Тестировать функции
+                    </button>
+                    <div id="functionsResult" class="text-sm bg-gray-50 p-3 rounded hidden">
+                        <!-- Результат тестирования -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Добавить тестовые данные -->
+            <div class="bg-white p-6 rounded-lg shadow">
+                <h3 class="text-lg font-semibold mb-4">📊 Тестовые данные</h3>
+                <div class="space-y-3">
+                    <button id="addTestData" class="w-full bg-purple-600 text-white py-2 rounded hover:bg-purple-700">
+                        Добавить тестовые расходы
+                    </button>
+                    <div id="testDataResult" class="text-sm bg-gray-50 p-3 rounded hidden">
+                        <!-- Результат добавления данных -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Инструкции -->
+            <div class="bg-white p-6 rounded-lg shadow">
+                <h3 class="text-lg font-semibold mb-4">📋 Как проверить</h3>
+                <div class="text-sm space-y-2">
+                    <p><strong>1.</strong> Откройте основное приложение (index.html)</p>
+                    <p><strong>2.</strong> Войдите в систему как администратор</p>
+                    <p><strong>3.</strong> Перейдите в раздел "Расходы"</p>
+                    <p><strong>4.</strong> Найдите блок фильтров над таблицей</p>
+                    <p><strong>5.</strong> Попробуйте выбрать значения в фильтрах</p>
+                    <p><strong>6.</strong> Проверьте, что таблица обновляется</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Возможные проблемы -->
+        <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mt-6">
+            <h3 class="text-lg font-semibold text-yellow-800 mb-2">⚠️ Возможные проблемы:</h3>
+            <ul class="text-yellow-700 text-sm space-y-1">
+                <li>• <strong>Фильтры не видны:</strong> Проверьте, что вы в разделе "Расходы"</li>
+                <li>• <strong>Списки пустые:</strong> Добавьте несколько записей расходов</li>
+                <li>• <strong>Не работает фильтрация:</strong> Откройте консоль браузера (F12) для проверки ошибок</li>
+                <li>• <strong>Ошибки JavaScript:</strong> Проверьте, что все функции определены</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        // Проверка наличия элементов
+        document.getElementById('checkElements').addEventListener('click', function() {
+            const result = document.getElementById('elementsResult');
+            result.classList.remove('hidden');
+            
+            let html = '<strong>Проверка элементов фильтров:</strong><br><br>';
+            
+            // Проверяем элементы в родительском окне (если есть)
+            if (window.parent && window.parent !== window) {
+                const parentDoc = window.parent.document;
+                
+                const elements = [
+                    'filterExpenseCompany',
+                    'filterExpenseProduct', 
+                    'filterExpenseClient',
+                    'clearExpenseFilters',
+                    'expenseFilterCount',
+                    'expenseTotalCount'
+                ];
+                
+                elements.forEach(id => {
+                    const element = parentDoc.getElementById(id);
+                    const status = element ? '✅' : '❌';
+                    html += `${status} ${id}: ${element ? 'найден' : 'не найден'}<br>`;
+                });
+            } else {
+                html += '❌ Откройте этот файл в iframe основного приложения<br>';
+            }
+            
+            result.innerHTML = html;
+        });
+
+        // Тест функций
+        document.getElementById('testFunctions').addEventListener('click', function() {
+            const result = document.getElementById('functionsResult');
+            result.classList.remove('hidden');
+            
+            let html = '<strong>Проверка функций:</strong><br><br>';
+            
+            if (window.parent && window.parent !== window) {
+                const parentWindow = window.parent;
+                
+                const functions = [
+                    'initializeExpenseFilters',
+                    'updateExpenseFilterOptions',
+                    'applyExpenseFilters',
+                    'clearExpenseFilters',
+                    'updateExpenseTableWithFilters'
+                ];
+                
+                functions.forEach(funcName => {
+                    const func = parentWindow[funcName];
+                    const status = typeof func === 'function' ? '✅' : '❌';
+                    html += `${status} ${funcName}: ${typeof func}<br>`;
+                });
+            } else {
+                html += '❌ Откройте этот файл в iframe основного приложения<br>';
+            }
+            
+            result.innerHTML = html;
+        });
+
+        // Добавление тестовых данных
+        document.getElementById('addTestData').addEventListener('click', function() {
+            const result = document.getElementById('testDataResult');
+            result.classList.remove('hidden');
+            
+            if (window.parent && window.parent !== window) {
+                const parentWindow = window.parent;
+                
+                // Добавляем тестовые данные через родительское окно
+                if (typeof parentWindow.addTestExpenseData === 'function') {
+                    try {
+                        parentWindow.addTestExpenseData();
+                        result.innerHTML = '✅ Тестовые данные добавлены! Проверьте раздел "Расходы"';
+                    } catch (error) {
+                        result.innerHTML = '❌ Ошибка при добавлении данных: ' + error.message;
+                    }
+                } else {
+                    result.innerHTML = '❌ Функция addTestExpenseData не найдена';
+                }
+            } else {
+                result.innerHTML = '❌ Откройте этот файл в iframe основного приложения';
+            }
+        });
+    </script>
+</body>
+</html>

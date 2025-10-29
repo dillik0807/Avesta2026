@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тест отчета за день</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-8">
+    <div class="max-w-6xl mx-auto">
+        <h1 class="text-3xl font-bold mb-6">Тест отчета за текущий день</h1>
+        
+        <div class="bg-white p-6 rounded-lg shadow mb-6">
+            <button id="testDailyReport" class="bg-emerald-600 text-white px-6 py-3 rounded-lg hover:bg-emerald-700">
+                📅 Сгенерировать тестовый отчет за сегодня
+            </button>
+        </div>
+
+        <div id="reportOutput" class="bg-white rounded-lg shadow p-6 hidden">
+            <h2 class="text-xl font-bold mb-4">Результат:</h2>
+            <div id="reportContent"></div>
+        </div>
+    </div>
+
+    <script>
+        // Тестовые данные
+        const testData = {
+            currentYear: 2025,
+            years: {
+                2025: {
+                    income: [
+                        {
+                            date: new Date().toISOString().split('T')[0], // Сегодняшняя дата
+                            company: "ООО Тест",
+                            warehouse: "Склад-1", 
+                            product: "Цемент",
+                            qtyDoc: 100,
+                            qtyFact: 98,
+                            difference: -2,
+                            weightTons: 4.9,
+                            user: "admin"
+                        },
+                        {
+                            date: new Date().toISOString().split('T')[0],
+                            company: "ИП Иванов",
+                            warehouse: "Склад-2",
+                            product: "Песок",
+                            qtyDoc: 50,
+                            qtyFact: 52,
+                            difference: 2,
+                            weightTons: 2.6,
+                            user: "admin"
+                        }
+                    ],
+                    expense: [
+                        {
+                            date: new Date().toISOString().split('T')[0],
+                            company: "ООО Тест",
+                            warehouse: "Склад-1",
+                            client: "Клиент А",
+                            product: "Цемент",
+                            quantity: 20,
+                            tons: 1.0,
+                            price: 50.00,
+                            total: 1000.00,
+                            user: "admin"
+                        },
+                        {
+                            date: new Date().toISOString().split('T')[0],
+                            company: "ИП Иванов", 
+                            warehouse: "Склад-2",
+                            client: "Клиент Б",
+                            product: "Песок",
+                            quantity: 15,
+                            tons: 0.75,
+                            price: 30.00,
+                            total: 450.00,
+                            user: "admin"
+                        }
+                    ]
+                }
+            }
+        };
+
+        // Имитируем глобальные переменные приложения
+        window.appData = testData;
+        window.currentUser = { role: 'admin' };
+
+        // Функции из основного приложения
+        function getCurrentYearData() {
+            return appData.years[appData.currentYear] || { income: [], expense: [] };
+        }
+
+        function getUserWarehouseNames() {
+            return []; // Для админа возвращаем пустой массив (доступ ко всем)
+        }
+
+        // Функция генерации отчета за день (копия из основного приложения)
+        function generateDailyReport() {
+            const today = new Date().toISOString().split('T')[0];
+            
+            let income = getCurrentYearData().income || [];
+            let expense = getCurrentYearData().expense || [];
+
+            // Фильтрация для завсклада
+            if (currentUser && currentUser.role === 'warehouse' && currentUser.warehouseGroup) {
+                const userWarehouses = getUserWarehouseNames();
+                income = income.filter(item => userWarehouses.includes(item.warehouse));
+                expense = expense.filter(item => userWarehouses.includes(item.warehouse));
+            }
+
+            // Фильтруем по текущей дате
+            const todayIncome = income.filter(item => item.date === today);
+            const todayExpense = expense.filter(item => item.date === today);
+
+            return {
+                date: today,
+                income: todayIncome,
+                expense: todayExpense
+            };
+        }
+
+        function generateDailyReportHtml(data) {
+            const formatDate = (dateStr) => {
+                const date = new Date(dateStr);
+                return date.toLocaleDateString('ru-RU', { 
+                    day: '2-digit', 
+                    month: '2-digit', 
+                    year: 'numeric' 
+                });
+            };
+
+            let html = `
+                <div class="daily-report">
+                    <div class="text-center mb-6">
+                        <h2 class="text-2xl font-bold text-gray-800">Отчет за ${formatDate(data.date)}</h2>
+                        <p class="text-gray-600">Приход и расход товаров</p>
+                    </div>
+            `;
+
+            // ПРИХОД
+            html += `
+                <div class="mb-8">
+                    <h3 class="text-xl font-semibold mb-4 text-green-700 border-b-2 border-green-200 pb-2">
+                        📦 ПРИХОД ТОВАРОВ
+                    </h3>
+            `;
+
+            if (data.income.length > 0) {
+                html += `
+                    <div class="overflow-x-auto">
+                        <table class="w-full border-collapse border border-gray-300">
+                            <thead class="bg-green-50">
+                                <tr>
+                                    <th class="border border-gray-300 p-2 text-left">Дата</th>
+                                    <th class="border border-gray-300 p-2 text-left">Фирма</th>
+                                    <th class="border border-gray-300 p-2 text-left">Склад</th>
+                                    <th class="border border-gray-300 p-2 text-left">Товар</th>
+                                    <th class="border border-gray-300 p-2 text-center">Кол-во по док</th>
+                                    <th class="border border-gray-300 p-2 text-center">Кол-во по факт</th>
+                                    <th class="border border-gray-300 p-2 text-center">Разница</th>
+                                    <th class="border border-gray-300 p-2 text-center">Вес тонн по факт</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                `;
+
+                let totalDoc = 0, totalFact = 0, totalDiff = 0, totalWeight = 0;
+
+                data.income.forEach(item => {
+                    totalDoc += item.qtyDoc || 0;
+                    totalFact += item.qtyFact || 0;
+                    totalDiff += item.difference || 0;
+                    totalWeight += item.weightTons || 0;
+
+                    html += `
+                        <tr class="hover:bg-gray-50">
+                            <td class="border border-gray-300 p-2">${formatDate(item.date)}</td>
+                            <td class="border border-gray-300 p-2">${item.company}</td>
+                            <td class="border border-gray-300 p-2">${item.warehouse}</td>
+                            <td class="border border-gray-300 p-2">${item.product}</td>
+                            <td class="border border-gray-300 p-2 text-center">${item.qtyDoc || 0}</td>
+                            <td class="border border-gray-300 p-2 text-center">${item.qtyFact || 0}</td>
+                            <td class="border border-gray-300 p-2 text-center ${(item.difference || 0) >= 0 ? 'text-green-600' : 'text-red-600'}">${item.difference || 0}</td>
+                            <td class="border border-gray-300 p-2 text-center">${(item.weightTons || 0).toFixed(2)}</td>
+                        </tr>
+                    `;
+                });
+
+                // Итоговая строка для прихода
+                html += `
+                        <tr class="bg-green-100 font-bold">
+                            <td colspan="4" class="border border-gray-300 p-2 text-right">ИТОГО ПРИХОД:</td>
+                            <td class="border border-gray-300 p-2 text-center">${totalDoc}</td>
+                            <td class="border border-gray-300 p-2 text-center">${totalFact}</td>
+                            <td class="border border-gray-300 p-2 text-center ${totalDiff >= 0 ? 'text-green-600' : 'text-red-600'}">${totalDiff}</td>
+                            <td class="border border-gray-300 p-2 text-center">${totalWeight.toFixed(2)}</td>
+                        </tr>
+                    </tbody>
+                </table>
+                </div>
+                `;
+            } else {
+                html += '<p class="text-gray-500 italic">За сегодня операций прихода не было</p>';
+            }
+
+            html += '</div>';
+
+            // РАСХОД
+            html += `
+                <div class="mb-8">
+                    <h3 class="text-xl font-semibold mb-4 text-red-700 border-b-2 border-red-200 pb-2">
+                        📤 РАСХОД ТОВАРОВ
+                    </h3>
+            `;
+
+            if (data.expense.length > 0) {
+                html += `
+                    <div class="overflow-x-auto">
+                        <table class="w-full border-collapse border border-gray-300">
+                            <thead class="bg-red-50">
+                                <tr>
+                                    <th class="border border-gray-300 p-2 text-left">Дата</th>
+                                    <th class="border border-gray-300 p-2 text-left">Фирма</th>
+                                    <th class="border border-gray-300 p-2 text-left">Склад</th>
+                                    <th class="border border-gray-300 p-2 text-left">Клиент</th>
+                                    <th class="border border-gray-300 p-2 text-left">Товар</th>
+                                    <th class="border border-gray-300 p-2 text-center">Количество</th>
+                                    <th class="border border-gray-300 p-2 text-center">Тонн</th>
+                                    <th class="border border-gray-300 p-2 text-center">Цена</th>
+                                    <th class="border border-gray-300 p-2 text-center">Сумма</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                `;
+
+                let totalQuantity = 0, totalTons = 0, totalSum = 0;
+
+                data.expense.forEach(item => {
+                    totalQuantity += item.quantity || 0;
+                    totalTons += item.tons || 0;
+                    totalSum += item.total || 0;
+
+                    html += `
+                        <tr class="hover:bg-gray-50">
+                            <td class="border border-gray-300 p-2">${formatDate(item.date)}</td>
+                            <td class="border border-gray-300 p-2">${item.company}</td>
+                            <td class="border border-gray-300 p-2">${item.warehouse}</td>
+                            <td class="border border-gray-300 p-2">${item.client}</td>
+                            <td class="border border-gray-300 p-2">${item.product}</td>
+                            <td class="border border-gray-300 p-2 text-center">${item.quantity || 0}</td>
+                            <td class="border border-gray-300 p-2 text-center">${(item.tons || 0).toFixed(2)}</td>
+                            <td class="border border-gray-300 p-2 text-center">${(item.price || 0).toFixed(2)}</td>
+                            <td class="border border-gray-300 p-2 text-center">${(item.total || 0).toFixed(2)}</td>
+                        </tr>
+                    `;
+                });
+
+                // Итоговая строка для расхода
+                html += `
+                        <tr class="bg-red-100 font-bold">
+                            <td colspan="5" class="border border-gray-300 p-2 text-right">ИТОГО РАСХОД:</td>
+                            <td class="border border-gray-300 p-2 text-center">${totalQuantity}</td>
+                            <td class="border border-gray-300 p-2 text-center">${totalTons.toFixed(2)}</td>
+                            <td class="border border-gray-300 p-2 text-center">-</td>
+                            <td class="border border-gray-300 p-2 text-center">${totalSum.toFixed(2)}</td>
+                        </tr>
+                    </tbody>
+                </table>
+                </div>
+                `;
+            } else {
+                html += '<p class="text-gray-500 italic">За сегодня операций расхода не было</p>';
+            }
+
+            html += '</div>';
+
+            // ОБЩИЙ ИТОГ
+            html += `
+                <div class="mt-8 p-4 bg-blue-50 border-2 border-blue-200 rounded-lg">
+                    <h3 class="text-lg font-bold text-blue-800 mb-2">📊 СВОДКА ЗА ДЕНЬ</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <p><strong>Операций прихода:</strong> ${data.income.length}</p>
+                            <p><strong>Операций расхода:</strong> ${data.expense.length}</p>
+                        </div>
+                        <div>
+                            <p><strong>Общая сумма расхода:</strong> ${data.expense.reduce((sum, item) => sum + (item.total || 0), 0).toFixed(2)} $</p>
+                            <p><strong>Общий вес прихода:</strong> ${data.income.reduce((sum, item) => sum + (item.weightTons || 0), 0).toFixed(2)} тонн</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            html += '</div>';
+            return html;
+        }
+
+        // Обработчик кнопки
+        document.getElementById('testDailyReport').addEventListener('click', function() {
+            console.log('Генерация тестового отчета...');
+            
+            const reportData = generateDailyReport();
+            const reportHtml = generateDailyReportHtml(reportData);
+            
+            document.getElementById('reportContent').innerHTML = reportHtml;
+            document.getElementById('reportOutput').classList.remove('hidden');
+            
+            console.log('Отчет сгенерирован:', reportData);
+        });
+    </script>
+</body>
+</html>

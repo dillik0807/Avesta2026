@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тест отчета на главной панели</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-4">
+    <div class="max-w-6xl mx-auto">
+        <h1 class="text-3xl font-bold mb-6">Тест отчета на главной панели</h1>
+        
+        <!-- Имитация главной панели -->
+        <div class="bg-white p-6 rounded-lg shadow mb-6">
+            <h2 class="text-xl font-bold mb-4">Панель управления</h2>
+            
+            <!-- Быстрые отчеты -->
+            <div class="bg-white p-6 rounded-lg shadow mt-6">
+                <h3 class="text-lg font-semibold mb-4">📊 Быстрые отчеты</h3>
+                <div class="flex flex-wrap gap-4">
+                    <button id="generateQuickDailyReport"
+                        class="bg-emerald-600 text-white px-6 py-3 rounded-lg hover:bg-emerald-700 transition-colors flex items-center gap-2">
+                        <span>📅</span>
+                        <span>Отчет за сегодня</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Контейнер для отчета за день -->
+            <div id="dailyReportContainer" class="bg-white rounded-lg shadow p-6 mt-6 hidden">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-lg font-semibold">📅 Отчет за сегодня</h3>
+                    <div class="flex items-center gap-2">
+                        <button id="exportDailyReportExcel" 
+                            class="bg-green-600 text-white px-3 py-1 rounded text-sm hover:bg-green-700 flex items-center gap-1">
+                            <span>📊</span>
+                            <span>Excel</span>
+                        </button>
+                        <button id="printDailyReport" 
+                            class="bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700 flex items-center gap-1">
+                            <span>🖨️</span>
+                            <span>Печать</span>
+                        </button>
+                        <button id="closeDailyReport" class="text-gray-500 hover:text-gray-700">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                <div id="dailyReportContent">
+                    <!-- Содержимое отчета будет добавлено здесь -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Тестовые данные
+        const testData = {
+            currentYear: 2025,
+            years: {
+                2025: {
+                    income: [
+                        {
+                            date: new Date().toISOString().split('T')[0],
+                            company: "ООО Тест",
+                            warehouse: "Склад-1", 
+                            product: "Цемент",
+                            qtyDoc: 100,
+                            qtyFact: 98,
+                            difference: -2,
+                            weightTons: 4.9,
+                            user: "admin"
+                        },
+                        {
+                            date: new Date().toISOString().split('T')[0],
+                            company: "ИП Иванов",
+                            warehouse: "Склад-2",
+                            product: "Песок",
+                            qtyDoc: 50,
+                            qtyFact: 52,
+                            difference: 2,
+                            weightTons: 2.6,
+                            user: "admin"
+                        }
+                    ],
+                    expense: [
+                        {
+                            date: new Date().toISOString().split('T')[0],
+                            company: "ООО Тест",
+                            warehouse: "Склад-1",
+                            client: "Клиент А",
+                            product: "Цемент",
+                            quantity: 20,
+                            tons: 1.0,
+                            price: 50.00,
+                            total: 1000.00,
+                            user: "admin"
+                        }
+                    ]
+                }
+            }
+        };
+
+        // Имитируем глобальные переменные
+        window.appData = testData;
+        window.currentUser = { role: 'admin' };
+
+        // Функции из основного приложения
+        function getCurrentYearData() {
+            return appData.years[appData.currentYear] || { income: [], expense: [] };
+        }
+
+        function getUserWarehouseNames() {
+            return [];
+        }
+
+        function generateDailyReport() {
+            const today = new Date().toISOString().split('T')[0];
+            
+            let income = getCurrentYearData().income || [];
+            let expense = getCurrentYearData().expense || [];
+
+            if (currentUser && currentUser.role === 'warehouse' && currentUser.warehouseGroup) {
+                const userWarehouses = getUserWarehouseNames();
+                income = income.filter(item => userWarehouses.includes(item.warehouse));
+                expense = expense.filter(item => userWarehouses.includes(item.warehouse));
+            }
+
+            const todayIncome = income.filter(item => item.date === today);
+            const todayExpense = expense.filter(item => item.date === today);
+
+            return {
+                date: today,
+                income: todayIncome,
+                expense: todayExpense
+            };
+        }
+
+        function generateDailyReportHtml(data) {
+            const formatDate = (dateStr) => {
+                const date = new Date(dateStr);
+                return date.toLocaleDateString('ru-RU', { 
+                    day: '2-digit', 
+                    month: '2-digit', 
+                    year: 'numeric' 
+                });
+            };
+
+            let html = `
+                <div class="daily-report">
+                    <div class="text-center mb-6">
+                        <h2 class="text-2xl font-bold text-gray-800">Отчет за ${formatDate(data.date)}</h2>
+                        <p class="text-gray-600">Приход и расход товаров</p>
+                    </div>
+            `;
+
+            // ПРИХОД
+            html += `
+                <div class="mb-8">
+                    <h3 class="text-xl font-semibold mb-4 text-green-700 border-b-2 border-green-200 pb-2">
+                        📦 ПРИХОД ТОВАРОВ
+                    </h3>
+            `;
+
+            if (data.income.length > 0) {
+                html += `
+                    <div class="overflow-x-auto">
+                        <table class="w-full border-collapse border border-gray-300">
+                            <thead class="bg-green-50">
+                                <tr>
+                                    <th class="border border-gray-300 p-2 text-left">Дата</th>
+                                    <th class="border border-gray-300 p-2 text-left">Фирма</th>
+                                    <th class="border border-gray-300 p-2 text-left">Склад</th>
+                                    <th class="border border-gray-300 p-2 text-left">Товар</th>
+                                    <th class="border border-gray-300 p-2 text-center">Кол-во по док</th>
+                                    <th class="border border-gray-300 p-2 text-center">Кол-во по факт</th>
+                                    <th class="border border-gray-300 p-2 text-center">Разница</th>
+                                    <th class="border border-gray-300 p-2 text-center">Вес тонн по факт</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                `;
+
+                let totalDoc = 0, totalFact = 0, totalDiff = 0, totalWeight = 0;
+
+                data.income.forEach(item => {
+                    totalDoc += item.qtyDoc || 0;
+                    totalFact += item.qtyFact || 0;
+                    totalDiff += item.difference || 0;
+                    totalWeight += item.weightTons || 0;
+
+                    html += `
+                        <tr class="hover:bg-gray-50">
+                            <td class="border border-gray-300 p-2">${formatDate(item.date)}</td>
+                            <td class="border border-gray-300 p-2">${item.company}</td>
+                            <td class="border border-gray-300 p-2">${item.warehouse}</td>
+                            <td class="border border-gray-300 p-2">${item.product}</td>
+                            <td class="border border-gray-300 p-2 text-center">${item.qtyDoc || 0}</td>
+                            <td class="border border-gray-300 p-2 text-center">${item.qtyFact || 0}</td>
+                            <td class="border border-gray-300 p-2 text-center ${(item.difference || 0) >= 0 ? 'text-green-600' : 'text-red-600'}">${item.difference || 0}</td>
+                            <td class="border border-gray-300 p-2 text-center">${(item.weightTons || 0).toFixed(2)}</td>
+                        </tr>
+                    `;
+                });
+
+                html += `
+                        <tr class="bg-green-100 font-bold">
+                            <td colspan="4" class="border border-gray-300 p-2 text-right">ИТОГО ПРИХОД:</td>
+                            <td class="border border-gray-300 p-2 text-center">${totalDoc}</td>
+                            <td class="border border-gray-300 p-2 text-center">${totalFact}</td>
+                            <td class="border border-gray-300 p-2 text-center ${totalDiff >= 0 ? 'text-green-600' : 'text-red-600'}">${totalDiff}</td>
+                            <td class="border border-gray-300 p-2 text-center">${totalWeight.toFixed(2)}</td>
+                        </tr>
+                    </tbody>
+                </table>
+                </div>
+                `;
+            } else {
+                html += '<p class="text-gray-500 italic">За сегодня операций прихода не было</p>';
+            }
+
+            html += '</div>';
+
+            // РАСХОД
+            html += `
+                <div class="mb-8">
+                    <h3 class="text-xl font-semibold mb-4 text-red-700 border-b-2 border-red-200 pb-2">
+                        📤 РАСХОД ТОВАРОВ
+                    </h3>
+            `;
+
+            if (data.expense.length > 0) {
+                html += `
+                    <div class="overflow-x-auto">
+                        <table class="w-full border-collapse border border-gray-300">
+                            <thead class="bg-red-50">
+                                <tr>
+                                    <th class="border border-gray-300 p-2 text-left">Дата</th>
+                                    <th class="border border-gray-300 p-2 text-left">Фирма</th>
+                                    <th class="border border-gray-300 p-2 text-left">Склад</th>
+                                    <th class="border border-gray-300 p-2 text-left">Клиент</th>
+                                    <th class="border border-gray-300 p-2 text-left">Товар</th>
+                                    <th class="border border-gray-300 p-2 text-center">Количество</th>
+                                    <th class="border border-gray-300 p-2 text-center">Тонн</th>
+                                    <th class="border border-gray-300 p-2 text-center">Цена</th>
+                                    <th class="border border-gray-300 p-2 text-center">Сумма</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                `;
+
+                let totalQuantity = 0, totalTons = 0, totalSum = 0;
+
+                data.expense.forEach(item => {
+                    totalQuantity += item.quantity || 0;
+                    totalTons += item.tons || 0;
+                    totalSum += item.total || 0;
+
+                    html += `
+                        <tr class="hover:bg-gray-50">
+                            <td class="border border-gray-300 p-2">${formatDate(item.date)}</td>
+                            <td class="border border-gray-300 p-2">${item.company}</td>
+                            <td class="border border-gray-300 p-2">${item.warehouse}</td>
+                            <td class="border border-gray-300 p-2">${item.client}</td>
+                            <td class="border border-gray-300 p-2">${item.product}</td>
+                            <td class="border border-gray-300 p-2 text-center">${item.quantity || 0}</td>
+                            <td class="border border-gray-300 p-2 text-center">${(item.tons || 0).toFixed(2)}</td>
+                            <td class="border border-gray-300 p-2 text-center">${(item.price || 0).toFixed(2)}</td>
+                            <td class="border border-gray-300 p-2 text-center">${(item.total || 0).toFixed(2)}</td>
+                        </tr>
+                    `;
+                });
+
+                html += `
+                        <tr class="bg-red-100 font-bold">
+                            <td colspan="5" class="border border-gray-300 p-2 text-right">ИТОГО РАСХОД:</td>
+                            <td class="border border-gray-300 p-2 text-center">${totalQuantity}</td>
+                            <td class="border border-gray-300 p-2 text-center">${totalTons.toFixed(2)}</td>
+                            <td class="border border-gray-300 p-2 text-center">-</td>
+                            <td class="border border-gray-300 p-2 text-center">${totalSum.toFixed(2)}</td>
+                        </tr>
+                    </tbody>
+                </table>
+                </div>
+                `;
+            } else {
+                html += '<p class="text-gray-500 italic">За сегодня операций расхода не было</p>';
+            }
+
+            html += '</div>';
+
+            // ОБЩИЙ ИТОГ
+            html += `
+                <div class="mt-8 p-4 bg-blue-50 border-2 border-blue-200 rounded-lg">
+                    <h3 class="text-lg font-bold text-blue-800 mb-2">📊 СВОДКА ЗА ДЕНЬ</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <p><strong>Операций прихода:</strong> ${data.income.length}</p>
+                            <p><strong>Операций расхода:</strong> ${data.expense.length}</p>
+                        </div>
+                        <div>
+                            <p><strong>Общая сумма расхода:</strong> ${data.expense.reduce((sum, item) => sum + (item.total || 0), 0).toFixed(2)} $</p>
+                            <p><strong>Общий вес прихода:</strong> ${data.income.reduce((sum, item) => sum + (item.weightTons || 0), 0).toFixed(2)} тонн</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            html += '</div>';
+            return html;
+        }
+
+        function generateDailyReportOnDashboard() {
+            console.log('📅 Генерация отчета за день на главной панели');
+            
+            const reportData = generateDailyReport();
+            const reportHtml = generateDailyReportHtml(reportData);
+            
+            document.getElementById('dailyReportContent').innerHTML = reportHtml;
+            document.getElementById('dailyReportContainer').classList.remove('hidden');
+            
+            document.getElementById('dailyReportContainer').scrollIntoView({ 
+                behavior: 'smooth', 
+                block: 'start' 
+            });
+            
+            console.log('✅ Отчет за день показан на главной панели');
+        }
+
+        // Обработчики событий
+        document.getElementById('generateQuickDailyReport').addEventListener('click', function () {
+            generateDailyReportOnDashboard();
+        });
+
+        document.getElementById('closeDailyReport').addEventListener('click', function () {
+            document.getElementById('dailyReportContainer').classList.add('hidden');
+        });
+
+        document.getElementById('exportDailyReportExcel').addEventListener('click', function () {
+            exportDailyReportToExcel();
+        });
+
+        document.getElementById('printDailyReport').addEventListener('click', function () {
+            printDailyReport();
+        });
+
+        // Функция экспорта в Excel (упрощенная версия для теста)
+        function exportDailyReportToExcel() {
+            const reportData = generateDailyReport();
+            const today = new Date().toLocaleDateString('ru-RU').replace(/\./g, '-');
+            
+            // Создаем CSV данные
+            let csvContent = "data:text/csv;charset=utf-8,\uFEFF";
+            
+            // Приход
+            csvContent += "ПРИХОД ТОВАРОВ\n";
+            csvContent += "Дата,Фирма,Склад,Товар,Кол-во по док,Кол-во по факт,Разница,Вес тонн по факт\n";
+            
+            reportData.income.forEach(item => {
+                csvContent += `${item.date},${item.company},${item.warehouse},${item.product},${item.qtyDoc},${item.qtyFact},${item.difference},${item.weightTons}\n`;
+            });
+            
+            csvContent += "\n\nРАСХОД ТОВАРОВ\n";
+            csvContent += "Дата,Фирма,Склад,Клиент,Товар,Количество,Тонн,Цена,Сумма\n";
+            
+            reportData.expense.forEach(item => {
+                csvContent += `${item.date},${item.company},${item.warehouse},${item.client},${item.product},${item.quantity},${item.tons},${item.price},${item.total}\n`;
+            });
+            
+            // Скачиваем файл
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", `Отчет_за_день_${today}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            alert('Отчет экспортирован в CSV формате');
+        }
+
+        // Функция печати
+        function printDailyReport() {
+            const reportContent = document.getElementById('dailyReportContent').innerHTML;
+            
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(`
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>Отчет за день</title>
+                    <style>
+                        body { font-family: Arial, sans-serif; margin: 20px; }
+                        table { border-collapse: collapse; width: 100%; margin-bottom: 20px; }
+                        th, td { border: 1px solid #000; padding: 6px; text-align: left; }
+                        th { background-color: #f0f0f0; font-weight: bold; }
+                    </style>
+                </head>
+                <body>
+                    ${reportContent}
+                </body>
+                </html>
+            `);
+            
+            printWindow.document.close();
+            printWindow.onload = function() {
+                printWindow.print();
+                printWindow.close();
+            };
+        }
+    </script>
+</body>
+</html>

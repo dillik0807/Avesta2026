@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тест доступа руководителя</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-8">
+    <div class="max-w-4xl mx-auto">
+        <h1 class="text-3xl font-bold mb-6">🔐 Тест доступа руководителя к главной панели</h1>
+        
+        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+            <h2 class="text-lg font-semibold text-blue-800 mb-2">✅ Изменения выполнены:</h2>
+            <ul class="text-blue-700 text-sm space-y-1">
+                <li>• Добавлен доступ к разделу 'dashboard' для роли 'manager'</li>
+                <li>• Обновлена функция showSection() - разрешен переход на главную</li>
+                <li>• Обновлена функция setupUserInterface() - кнопка "Главная" видна</li>
+                <li>• Обновлена функция updateMobileMenuAccess() - мобильное меню</li>
+            </ul>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Тест входа руководителя -->
+            <div class="bg-white p-6 rounded-lg shadow">
+                <h3 class="text-lg font-semibold mb-4">👤 Тест входа руководителя</h3>
+                <div class="space-y-3">
+                    <div class="p-3 bg-gray-50 rounded">
+                        <strong>Логин:</strong> rukovoditel<br>
+                        <strong>Пароль:</strong> 123456<br>
+                        <strong>Роль:</strong> manager
+                    </div>
+                    <button id="testManagerLogin" class="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700">
+                        Войти как руководитель
+                    </button>
+                </div>
+            </div>
+
+            <!-- Доступные разделы -->
+            <div class="bg-white p-6 rounded-lg shadow">
+                <h3 class="text-lg font-semibold mb-4">📋 Доступные разделы для руководителя</h3>
+                <div class="space-y-2 text-sm">
+                    <div class="flex items-center gap-2 p-2 bg-green-50 rounded">
+                        <span class="text-green-600">✅</span>
+                        <span>🏠 Главная (dashboard)</span>
+                    </div>
+                    <div class="flex items-center gap-2 p-2 bg-green-50 rounded">
+                        <span class="text-green-600">✅</span>
+                        <span>🚛 Свод Вагонов</span>
+                    </div>
+                    <div class="flex items-center gap-2 p-2 bg-green-50 rounded">
+                        <span class="text-green-600">✅</span>
+                        <span>📊 Свод Остатков</span>
+                    </div>
+                    <div class="flex items-center gap-2 p-2 bg-green-50 rounded">
+                        <span class="text-green-600">✅</span>
+                        <span>💳 Отчёт по долгам</span>
+                    </div>
+                    <div class="flex items-center gap-2 p-2 bg-green-50 rounded">
+                        <span class="text-green-600">✅</span>
+                        <span>🚚 Итоги Вагонов</span>
+                    </div>
+                    <div class="flex items-center gap-2 p-2 bg-green-50 rounded">
+                        <span class="text-green-600">✅</span>
+                        <span>📦 Остатки складов</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Недоступные разделы -->
+            <div class="bg-white p-6 rounded-lg shadow">
+                <h3 class="text-lg font-semibold mb-4">🚫 Недоступные разделы</h3>
+                <div class="space-y-2 text-sm">
+                    <div class="flex items-center gap-2 p-2 bg-red-50 rounded">
+                        <span class="text-red-600">❌</span>
+                        <span>📦 Приход</span>
+                    </div>
+                    <div class="flex items-center gap-2 p-2 bg-red-50 rounded">
+                        <span class="text-red-600">❌</span>
+                        <span>📤 Расход</span>
+                    </div>
+                    <div class="flex items-center gap-2 p-2 bg-red-50 rounded">
+                        <span class="text-red-600">❌</span>
+                        <span>💰 Погашения</span>
+                    </div>
+                    <div class="flex items-center gap-2 p-2 bg-red-50 rounded">
+                        <span class="text-red-600">❌</span>
+                        <span>📈 Отчёты</span>
+                    </div>
+                    <div class="flex items-center gap-2 p-2 bg-red-50 rounded">
+                        <span class="text-red-600">❌</span>
+                        <span>⚙️ Управление</span>
+                    </div>
+                    <div class="flex items-center gap-2 p-2 bg-red-50 rounded">
+                        <span class="text-red-600">❌</span>
+                        <span>👥 Пользователи</span>
+                    </div>
+                    <div class="flex items-center gap-2 p-2 bg-red-50 rounded">
+                        <span class="text-red-600">❌</span>
+                        <span>💾 Резервное копирование</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Тест функций -->
+            <div class="bg-white p-6 rounded-lg shadow">
+                <h3 class="text-lg font-semibold mb-4">🧪 Тест функций</h3>
+                <div class="space-y-3">
+                    <button id="testDashboardAccess" class="w-full bg-green-600 text-white py-2 rounded hover:bg-green-700">
+                        Тест доступа к главной
+                    </button>
+                    <button id="testRestrictedAccess" class="w-full bg-red-600 text-white py-2 rounded hover:bg-red-700">
+                        Тест недоступного раздела
+                    </button>
+                    <button id="testMenuVisibility" class="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700">
+                        Тест видимости меню
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mt-6">
+            <h4 class="font-semibold text-yellow-800 mb-2">📝 Инструкция по тестированию:</h4>
+            <ol class="text-yellow-700 text-sm space-y-1 list-decimal list-inside">
+                <li>Откройте основной файл index.html</li>
+                <li>Войдите как руководитель (rukovoditel / 123456)</li>
+                <li>Проверьте что кнопка "Главная" видна в меню</li>
+                <li>Нажмите на "Главная" - должна открыться панель управления</li>
+                <li>Проверьте что недоступные разделы скрыты или блокированы</li>
+                <li>Протестируйте быстрые отчеты на главной панели</li>
+            </ol>
+        </div>
+    </div>
+
+    <script>
+        // Имитация данных пользователей
+        const testUsers = [
+            { username: 'admin', password: '123456', role: 'admin' },
+            { username: 'rukovoditel', password: '123456', role: 'manager' },
+            { username: 'warehouse1', password: '123456', role: 'warehouse' },
+            { username: 'cashier1', password: '123456', role: 'cashier' }
+        ];
+
+        let currentUser = null;
+
+        // Имитация функций из основного приложения
+        function showSection(sectionId) {
+            console.log('🔄 Попытка перехода к разделу:', sectionId);
+            
+            // Проверяем права доступа для роли "manager"
+            if (currentUser && currentUser.role === 'manager') {
+                const allowedSections = ['dashboard', 'wagon-summary', 'balance-summary', 'debt-report', 'wagon-totals', 'stock-balance'];
+                if (!allowedSections.includes(sectionId)) {
+                    alert('❌ У вас нет доступа к этому разделу. Доступны только главная панель, отчеты и сводки.');
+                    return false;
+                }
+            }
+            
+            console.log('✅ Доступ к разделу разрешен:', sectionId);
+            return true;
+        }
+
+        function setupUserInterface() {
+            if (!currentUser) return;
+            
+            const role = currentUser.role;
+            console.log('🔧 Настройка интерфейса для роли:', role);
+
+            // Права доступа к разделам меню
+            const menuItems = {
+                'dashboard': ['admin', 'warehouse', 'cashier', 'manager'],
+                'income': ['admin', 'warehouse'],
+                'expense': ['admin', 'warehouse'],
+                'payments': ['admin', 'cashier'],
+                'wagon-summary': ['admin', 'warehouse', 'cashier', 'manager'],
+                'balance-summary': ['admin', 'warehouse', 'cashier', 'manager'],
+                'debt-report': ['admin', 'cashier', 'warehouse', 'manager'],
+                'wagon-totals': ['admin', 'warehouse', 'cashier', 'manager'],
+                'stock-balance': ['admin', 'cashier', 'manager'],
+                'reports': ['admin', 'warehouse', 'cashier'],
+                'management': ['admin', 'warehouse', 'cashier'],
+                'users': ['admin'],
+                'backup': ['admin', 'warehouse', 'cashier']
+            };
+
+            console.log('📋 Доступные разделы для роли', role + ':', 
+                Object.keys(menuItems).filter(section => menuItems[section].includes(role))
+            );
+        }
+
+        // Обработчики событий
+        document.getElementById('testManagerLogin').addEventListener('click', function() {
+            currentUser = testUsers.find(u => u.username === 'rukovoditel');
+            if (currentUser) {
+                alert('✅ Вход выполнен как: ' + currentUser.username + ' (роль: ' + currentUser.role + ')');
+                setupUserInterface();
+            }
+        });
+
+        document.getElementById('testDashboardAccess').addEventListener('click', function() {
+            if (!currentUser) {
+                alert('❌ Сначала войдите в систему');
+                return;
+            }
+            
+            const result = showSection('dashboard');
+            if (result) {
+                alert('✅ Доступ к главной панели разрешен!');
+            }
+        });
+
+        document.getElementById('testRestrictedAccess').addEventListener('click', function() {
+            if (!currentUser) {
+                alert('❌ Сначала войдите в систему');
+                return;
+            }
+            
+            showSection('income'); // Должно быть заблокировано для manager
+        });
+
+        document.getElementById('testMenuVisibility').addEventListener('click', function() {
+            if (!currentUser) {
+                alert('❌ Сначала войдите в систему');
+                return;
+            }
+            
+            setupUserInterface();
+            alert('✅ Проверьте консоль для информации о видимости меню');
+        });
+    </script>
+</body>
+</html>

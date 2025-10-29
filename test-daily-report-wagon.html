@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тест отчета за день с колонкой "Вагон"</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+</head>
+<body class="bg-gray-100 p-4">
+    <div class="max-w-6xl mx-auto">
+        <h1 class="text-3xl font-bold mb-6">🚛 Тест отчета за день с колонкой "Вагон"</h1>
+        
+        <div class="bg-white p-6 rounded-lg shadow mb-6">
+            <h2 class="text-xl font-bold mb-4">📋 Описание изменений</h2>
+            <div class="bg-green-50 border border-green-200 rounded p-4">
+                <p class="text-green-800">
+                    <strong>Добавлено:</strong> Колонка "Вагон" в отчет за текущий день в разделе "Приход товаров"
+                </p>
+                <ul class="mt-2 text-green-700 text-sm list-disc list-inside">
+                    <li>Колонка добавлена между "Дата" и "Фирма"</li>
+                    <li>Показывает номер вагона для каждого прихода</li>
+                    <li>Если вагон не указан, показывается "-"</li>
+                    <li>Обновлен экспорт в Excel</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="bg-white p-6 rounded-lg shadow mb-6">
+            <h2 class="text-xl font-bold mb-4">🧪 Тестовые данные</h2>
+            <button id="generateTestReport" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 mb-4">
+                Сгенерировать тестовый отчет
+            </button>
+            <button id="exportTestReport" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 mb-4 ml-2">
+                Экспорт в Excel
+            </button>
+        </div>
+
+        <!-- Контейнер для отчета -->
+        <div id="reportContainer" class="bg-white rounded-lg shadow p-6 hidden">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-semibold">📅 Отчет за сегодня</h3>
+                <button id="closeReport" class="text-gray-500 hover:text-gray-700">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            <div id="reportContent">
+                <!-- Содержимое отчета будет добавлено здесь -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Тестовые данные с вагонами
+        const testData = {
+            date: new Date().toISOString().split('T')[0],
+            income: [
+                {
+                    date: new Date().toISOString().split('T')[0],
+                    wagon: "В-12345",
+                    company: "ООО Строй-Материалы",
+                    warehouse: "Склад Сугд-1", 
+                    product: "Цемент М400",
+                    qtyDoc: 100,
+                    qtyFact: 98,
+                    difference: -2,
+                    weightTons: 4.9,
+                    user: "admin"
+                },
+                {
+                    date: new Date().toISOString().split('T')[0],
+                    wagon: "В-67890",
+                    company: "ИП Иванов А.С.",
+                    warehouse: "Склад Хисор-А",
+                    product: "Песок речной",
+                    qtyDoc: 50,
+                    qtyFact: 52,
+                    difference: 2,
+                    weightTons: 2.6,
+                    user: "tillo"
+                },
+                {
+                    date: new Date().toISOString().split('T')[0],
+                    wagon: "", // Пустой вагон для теста
+                    company: "ТД Стройком",
+                    warehouse: "Склад Сугд-2",
+                    product: "Щебень 5-20",
+                    qtyDoc: 75,
+                    qtyFact: 75,
+                    difference: 0,
+                    weightTons: 3.75,
+                    user: "admin"
+                }
+            ],
+            expense: [
+                {
+                    date: new Date().toISOString().split('T')[0],
+                    company: "ООО Строй-Материалы",
+                    warehouse: "Склад Сугд-1",
+                    client: "Иван Петров",
+                    product: "Цемент М400",
+                    quantity: 20,
+                    tons: 1.0,
+                    price: 1250.00,
+                    total: 1250.00,
+                    user: "admin"
+                }
+            ]
+        };
+
+        // Функция генерации HTML отчета (копия из основного приложения с добавленной колонкой "Вагон")
+        function generateDailyReportHtml(data) {
+            const formatDate = (dateStr) => {
+                const date = new Date(dateStr);
+                return date.toLocaleDateString('ru-RU', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric'
+                });
+            };
+
+            let html = `
+                <div class="daily-report">
+                    <div class="text-center mb-6">
+                        <h2 class="text-2xl font-bold text-gray-800">Отчет за ${formatDate(data.date)}</h2>
+                        <p class="text-gray-600">Приход и расход товаров</p>
+                    </div>
+            `;
+
+            // ПРИХОД
+            html += `
+                <div class="mb-8">
+                    <h3 class="text-xl font-semibold mb-4 text-green-700 border-b-2 border-green-200 pb-2">
+                        📦 ПРИХОД ТОВАРОВ
+                    </h3>
+            `;
+
+            if (data.income.length > 0) {
+                html += `
+                    <div class="overflow-x-auto">
+                        <table class="w-full border-collapse border border-gray-300">
+                            <thead class="bg-green-50">
+                                <tr>
+                                    <th class="border border-gray-300 p-2 text-left">Дата</th>
+                                    <th class="border border-gray-300 p-2 text-left">Вагон</th>
+                                    <th class="border border-gray-300 p-2 text-left">Фирма</th>
+                                    <th class="border border-gray-300 p-2 text-left">Склад</th>
+                                    <th class="border border-gray-300 p-2 text-left">Товар</th>
+                                    <th class="border border-gray-300 p-2 text-center">Кол-во по док</th>
+                                    <th class="border border-gray-300 p-2 text-center">Кол-во по факт</th>
+                                    <th class="border border-gray-300 p-2 text-center">Разница</th>
+                                    <th class="border border-gray-300 p-2 text-center">Вес тонн по факт</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                `;
+
+                let totalDoc = 0, totalFact = 0, totalDiff = 0, totalWeight = 0;
+
+                data.income.forEach(item => {
+                    totalDoc += item.qtyDoc || 0;
+                    totalFact += item.qtyFact || 0;
+                    totalDiff += item.difference || 0;
+                    totalWeight += item.weightTons || 0;
+
+                    html += `
+                        <tr class="hover:bg-gray-50">
+                            <td class="border border-gray-300 p-2">${formatDate(item.date)}</td>
+                            <td class="border border-gray-300 p-2">${item.wagon || '-'}</td>
+                            <td class="border border-gray-300 p-2">${item.company}</td>
+                            <td class="border border-gray-300 p-2">${item.warehouse}</td>
+                            <td class="border border-gray-300 p-2">${item.product}</td>
+                            <td class="border border-gray-300 p-2 text-center">${item.qtyDoc || 0}</td>
+                            <td class="border border-gray-300 p-2 text-center">${item.qtyFact || 0}</td>
+                            <td class="border border-gray-300 p-2 text-center ${(item.difference || 0) >= 0 ? 'text-green-600' : 'text-red-600'}">${item.difference || 0}</td>
+                            <td class="border border-gray-300 p-2 text-center">${(item.weightTons || 0).toFixed(2)}</td>
+                        </tr>
+                    `;
+                });
+
+                // Итоговая строка для прихода
+                html += `
+                        <tr class="bg-green-100 font-bold">
+                            <td colspan="5" class="border border-gray-300 p-2 text-right">ИТОГО ПРИХОД:</td>
+                            <td class="border border-gray-300 p-2 text-center">${totalDoc}</td>
+                            <td class="border border-gray-300 p-2 text-center">${totalFact}</td>
+                            <td class="border border-gray-300 p-2 text-center ${totalDiff >= 0 ? 'text-green-600' : 'text-red-600'}">${totalDiff}</td>
+                            <td class="border border-gray-300 p-2 text-center">${totalWeight.toFixed(2)}</td>
+                        </tr>
+                    </tbody>
+                </table>
+                </div>
+            `;
+            } else {
+                html += `<p class="text-gray-500 italic">Нет данных о приходе товаров за этот день.</p>`;
+            }
+
+            html += `</div>`;
+
+            // РАСХОД (упрощенная версия для теста)
+            html += `
+                <div class="mb-8">
+                    <h3 class="text-xl font-semibold mb-4 text-red-700 border-b-2 border-red-200 pb-2">
+                        📤 РАСХОД ТОВАРОВ
+                    </h3>
+            `;
+
+            if (data.expense.length > 0) {
+                html += `<p class="text-gray-600">Записей расхода: ${data.expense.length}</p>`;
+            } else {
+                html += `<p class="text-gray-500 italic">Нет данных о расходе товаров за этот день.</p>`;
+            }
+
+            html += `</div></div>`;
+
+            return html;
+        }
+
+        // Функция экспорта в Excel
+        function exportTestReportToExcel() {
+            const workbook = {
+                SheetNames: ['Приход'],
+                Sheets: {}
+            };
+
+            // Лист: Приход товаров с колонкой "Вагон"
+            const incomeData = [
+                ['Дата', 'Вагон', 'Фирма', 'Склад', 'Товар', 'Кол-во по док', 'Кол-во по факт', 'Разница', 'Вес тонн по факт', 'Пользователь']
+            ];
+
+            let totalDoc = 0, totalFact = 0, totalDiff = 0, totalWeight = 0;
+
+            testData.income.forEach(item => {
+                totalDoc += item.qtyDoc || 0;
+                totalFact += item.qtyFact || 0;
+                totalDiff += item.difference || 0;
+                totalWeight += item.weightTons || 0;
+
+                incomeData.push([
+                    new Date(item.date).toLocaleDateString('ru-RU'),
+                    item.wagon || '',
+                    item.company || '',
+                    item.warehouse || '',
+                    item.product || '',
+                    item.qtyDoc || 0,
+                    item.qtyFact || 0,
+                    item.difference || 0,
+                    (item.weightTons || 0).toFixed(2),
+                    item.user || ''
+                ]);
+            });
+
+            // Добавляем итоговую строку
+            incomeData.push([
+                'ИТОГО:',
+                '',
+                '',
+                '',
+                '',
+                totalDoc,
+                totalFact,
+                totalDiff,
+                totalWeight.toFixed(2),
+                ''
+            ]);
+
+            workbook.Sheets['Приход'] = XLSX.utils.aoa_to_sheet(incomeData);
+
+            const fileName = `Тест_отчет_с_вагонами_${new Date().toLocaleDateString('ru-RU').replace(/\./g, '-')}.xlsx`;
+            XLSX.writeFile(workbook, fileName);
+
+            alert('Тестовый отчет экспортирован в Excel: ' + fileName);
+        }
+
+        // Обработчики событий
+        document.getElementById('generateTestReport').addEventListener('click', function() {
+            const reportHtml = generateDailyReportHtml(testData);
+            document.getElementById('reportContent').innerHTML = reportHtml;
+            document.getElementById('reportContainer').classList.remove('hidden');
+        });
+
+        document.getElementById('exportTestReport').addEventListener('click', function() {
+            exportTestReportToExcel();
+        });
+
+        document.getElementById('closeReport').addEventListener('click', function() {
+            document.getElementById('reportContainer').classList.add('hidden');
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Демо: Завсклад с несколькими группами</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .demo-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        .user-info { background: #f0f8ff; }
+        .warehouse-list { background: #f0fff0; }
+        .example { background: #fff8dc; }
+        code { background: #f5f5f5; padding: 2px 4px; border-radius: 3px; }
+    </style>
+</head>
+<body>
+    <h1>🏭 Демонстрация: Завсклад с несколькими группами складов</h1>
+    
+    <div class="demo-section user-info">
+        <h2>👤 Информация о пользователе</h2>
+        <p><strong>Логин:</strong> tillo</p>
+        <p><strong>Роль:</strong> Завсклад</p>
+        <p><strong>Группы складов:</strong> Сугд, Хисор</p>
+        <p><strong>Доступные склады:</strong> Все склады из групп "Сугд" и "Хисор"</p>
+    </div>
+
+    <div class="demo-section warehouse-list">
+        <h2>🏪 Доступные склады</h2>
+        <h3>Группа "Сугд":</h3>
+        <ul>
+            <li>Склад Сугд-1</li>
+            <li>Склад Сугд-2</li>
+            <li>Склад Сугд Центральный</li>
+        </ul>
+        
+        <h3>Группа "Хисор":</h3>
+        <ul>
+            <li>Склад Хисор-А</li>
+            <li>Склад Хисор-Б</li>
+            <li>Склад Хисор Главный</li>
+        </ul>
+    </div>
+
+    <div class="demo-section example">
+        <h2>⚙️ Как это работает</h2>
+        
+        <h3>1. Создание пользователя с несколькими группами:</h3>
+        <pre><code>{
+    username: 'tillo',
+    password: '123456',
+    role: 'warehouse',
+    warehouseGroup: ['Сугд', 'Хисор'],  // Массив групп!
+    blocked: false
+}</code></pre>
+
+        <h3>2. Фильтрация складов:</h3>
+        <pre><code>function filterWarehousesByUserGroups(warehouses) {
+    if (currentUser && currentUser.role === 'warehouse' && currentUser.warehouseGroup) {
+        const userGroups = Array.isArray(currentUser.warehouseGroup) ? 
+            currentUser.warehouseGroup.filter(g => g !== '') : 
+            [currentUser.warehouseGroup].filter(g => g !== '');
+        
+        if (userGroups.length > 0) {
+            return warehouses.filter(w => userGroups.includes(w.group));
+        }
+    }
+    return warehouses;
+}</code></pre>
+
+        <h3>3. Получение названий складов пользователя:</h3>
+        <pre><code>function getUserWarehouseNames() {
+    if (currentUser && currentUser.role === 'warehouse' && currentUser.warehouseGroup) {
+        const userGroups = Array.isArray(currentUser.warehouseGroup) ? 
+            currentUser.warehouseGroup.filter(g => g !== '') : 
+            [currentUser.warehouseGroup].filter(g => g !== '');
+        
+        if (userGroups.length > 0) {
+            return appData.warehouses
+                .filter(w => userGroups.includes(w.group))
+                .map(w => w.name);
+        }
+    }
+    return appData.warehouses.map(w => w.name);
+}</code></pre>
+    </div>
+
+    <div class="demo-section">
+        <h2>📋 Инструкция по настройке</h2>
+        
+        <h3>Шаг 1: Создание групп складов</h3>
+        <p>В разделе "Управление" → "Подгруппы складов" создайте нужные группы:</p>
+        <ul>
+            <li>Сугд</li>
+            <li>Хисор</li>
+            <li>Душанбе</li>
+            <li>и т.д.</li>
+        </ul>
+
+        <h3>Шаг 2: Создание складов</h3>
+        <p>В разделе "Управление" → "Склады" создайте склады и назначьте им группы:</p>
+        <ul>
+            <li>Склад Сугд-1 → Группа: Сугд</li>
+            <li>Склад Хисор-А → Группа: Хисор</li>
+        </ul>
+
+        <h3>Шаг 3: Создание пользователя-завсклада</h3>
+        <p>В разделе "Пользователи" создайте пользователя:</p>
+        <ul>
+            <li>Логин: tillo</li>
+            <li>Роль: Завсклад</li>
+            <li>Подгруппы складов: Выберите несколько групп, удерживая Ctrl</li>
+        </ul>
+
+        <h3>Шаг 4: Проверка работы</h3>
+        <p>Войдите под пользователем tillo и убедитесь, что:</p>
+        <ul>
+            <li>В выпадающих списках складов отображаются только склады из выбранных групп</li>
+            <li>В отчетах показываются данные только по доступным складам</li>
+            <li>Нельзя создать операции для недоступных складов</li>
+        </ul>
+    </div>
+
+    <div class="demo-section">
+        <h2>✅ Преимущества новой системы</h2>
+        <ul>
+            <li><strong>Гибкость:</strong> Завсклад может работать с несколькими группами одновременно</li>
+            <li><strong>Безопасность:</strong> Доступ только к назначенным складам</li>
+            <li><strong>Удобство:</strong> Простой интерфейс выбора групп</li>
+            <li><strong>Масштабируемость:</strong> Легко добавлять новые группы и склады</li>
+            <li><strong>Совместимость:</strong> Работает со старыми данными (одна группа)</li>
+        </ul>
+    </div>
+
+    <div class="demo-section">
+        <h2>🔧 Техническая информация</h2>
+        <p><strong>Изменения в структуре данных:</strong></p>
+        <ul>
+            <li><code>warehouseGroup</code> теперь может быть массивом строк</li>
+            <li>Обратная совместимость с одиночными группами</li>
+            <li>Новые вспомогательные функции фильтрации</li>
+            <li>Обновленный интерфейс с мультиселектором</li>
+        </ul>
+        
+        <p><strong>Файлы, которые были обновлены:</strong></p>
+        <ul>
+            <li><code>index.html</code> - основное приложение</li>
+            <li><code>offline.html</code> - автономная версия</li>
+            <li>Все функции фильтрации складов</li>
+            <li>Интерфейс управления пользователями</li>
+        </ul>
+    </div>
+</body>
+</html>

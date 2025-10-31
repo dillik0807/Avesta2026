@@ -1,7 +1,7 @@
 {
-  "name": "warehouse-mobile-app",
+  "name": "avesta2026",
   "version": "1.0.0",
-  "description": "Мобильное приложение для системы учёта товаров",
+  "description": "Avesta2026 - Система учёта товаров",
   "main": "index.js",
   "scripts": {
     "build": "npm run copy-files",
@@ -28,10 +28,11 @@
     "android",
     "ios"
   ],
-  "author": "Warehouse System Team",
+  "author": "Avesta2026 Team",
   "license": "MIT",
   "devDependencies": {
-    "@capacitor/cli": "^5.5.1"
+    "@capacitor/cli": "^5.5.1",
+    "typescript": "^5.9.3"
   },
   "dependencies": {
     "@capacitor/android": "^5.5.1",
@@ -42,9 +43,9 @@
     "@capacitor/ios": "^5.5.1",
     "@capacitor/keyboard": "^5.0.6",
     "@capacitor/network": "^5.0.6",
+    "@capacitor/preferences": "^5.0.6",
     "@capacitor/splash-screen": "^5.0.6",
     "@capacitor/status-bar": "^5.0.6",
-    "@capacitor/storage": "^1.2.5",
     "@capacitor/toast": "^5.0.6"
   }
 }

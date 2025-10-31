@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Создание иконок Avesta</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .icon-preview { margin: 20px 0; }
+        canvas { border: 1px solid #ccc; margin: 10px; }
+        button { padding: 10px 20px; margin: 5px; background: #1e40af; color: white; border: none; border-radius: 5px; cursor: pointer; }
+        button:hover { background: #1d4ed8; }
+    </style>
+</head>
+<body>
+    <h1>🎨 Генератор иконок Avesta</h1>
+    
+    <div class="icon-preview">
+        <h3>Предварительный просмотр:</h3>
+        <canvas id="preview" width="512" height="512"></canvas>
+    </div>
+    
+    <div>
+        <button onclick="generateIcon(48)">48x48 (mdpi)</button>
+        <button onclick="generateIcon(72)">72x72 (hdpi)</button>
+        <button onclick="generateIcon(96)">96x96 (xhdpi)</button>
+        <button onclick="generateIcon(144)">144x144 (xxhdpi)</button>
+        <button onclick="generateIcon(192)">192x192 (xxxhdpi)</button>
+        <button onclick="generateIcon(512)">512x512 (Store)</button>
+    </div>
+    
+    <div id="downloads"></div>
+
+    <script>
+        function drawIcon(canvas, size) {
+            const ctx = canvas.getContext('2d');
+            canvas.width = size;
+            canvas.height = size;
+            
+            // Очистка
+            ctx.clearRect(0, 0, size, size);
+            
+            // Создаем градиенты
+            const bgGradient = ctx.createRadialGradient(size/2, size/2, 0, size/2, size/2, size/2);
+            bgGradient.addColorStop(0, '#1e40af');
+            bgGradient.addColorStop(1, '#0f172a');
+            
+            const goldGradient = ctx.createLinearGradient(0, 0, size, size);
+            goldGradient.addColorStop(0, '#FFD700');
+            goldGradient.addColorStop(0.25, '#FFA500');
+            goldGradient.addColorStop(0.5, '#FFD700');
+            goldGradient.addColorStop(0.75, '#B8860B');
+            goldGradient.addColorStop(1, '#DAA520');
+            
+            // Фон с закругленными углами
+            const radius = size * 0.125;
+            ctx.fillStyle = bgGradient;
+            ctx.beginPath();
+            ctx.roundRect(0, 0, size, size, radius);
+            ctx.fill();
+            
+            // Рамка
+            ctx.strokeStyle = goldGradient;
+            ctx.lineWidth = size * 0.008;
+            ctx.beginPath();
+            ctx.roundRect(size * 0.0625, size * 0.0625, size * 0.875, size * 0.875, radius * 0.5);
+            ctx.stroke();
+            
+            // Текст "Avesta"
+            ctx.fillStyle = goldGradient;
+            ctx.font = `900 ${size * 0.125}px Arial Black, Arial, sans-serif`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            
+            // Тень для текста
+            ctx.shadowColor = 'rgba(0, 0, 0, 0.3)';
+            ctx.shadowBlur = size * 0.006;
+            ctx.shadowOffsetX = size * 0.004;
+            ctx.shadowOffsetY = size * 0.004;
+            
+            ctx.fillText('Avesta', size/2, size * 0.55);
+            
+            // Подзаголовок "2026"
+            ctx.font = `bold ${size * 0.0625}px Arial, sans-serif`;
+            ctx.globalAlpha = 0.8;
+            ctx.fillText('2026', size/2, size * 0.665);
+            
+            // Убираем тень и прозрачность
+            ctx.shadowColor = 'transparent';
+            ctx.globalAlpha = 1;
+            
+            // Декоративные элементы
+            ctx.fillStyle = goldGradient;
+            ctx.globalAlpha = 0.6;
+            
+            const dotSize = size * 0.016;
+            const margin = size * 0.25;
+            
+            // Углы
+            ctx.beginPath();
+            ctx.arc(margin, margin, dotSize, 0, 2 * Math.PI);
+            ctx.fill();
+            
+            ctx.beginPath();
+            ctx.arc(size - margin, margin, dotSize, 0, 2 * Math.PI);
+            ctx.fill();
+            
+            ctx.beginPath();
+            ctx.arc(margin, size - margin, dotSize, 0, 2 * Math.PI);
+            ctx.fill();
+            
+            ctx.beginPath();
+            ctx.arc(size - margin, size - margin, dotSize, 0, 2 * Math.PI);
+            ctx.fill();
+            
+            // Звезда сверху
+            ctx.globalAlpha = 0.7;
+            const starSize = size * 0.04;
+            const starY = size * 0.156;
+            drawStar(ctx, size/2, starY, starSize);
+            
+            ctx.globalAlpha = 1;
+        }
+        
+        function drawStar(ctx, x, y, size) {
+            ctx.beginPath();
+            ctx.moveTo(x, y - size);
+            ctx.lineTo(x + size * 0.3, y - size * 0.3);
+            ctx.lineTo(x + size, y - size * 0.3);
+            ctx.lineTo(x + size * 0.5, y + size * 0.1);
+            ctx.lineTo(x + size * 0.8, y + size);
+            ctx.lineTo(x, y + size * 0.4);
+            ctx.lineTo(x - size * 0.8, y + size);
+            ctx.lineTo(x - size * 0.5, y + size * 0.1);
+            ctx.lineTo(x - size, y - size * 0.3);
+            ctx.lineTo(x - size * 0.3, y - size * 0.3);
+            ctx.closePath();
+            ctx.fill();
+        }
+        
+        function generateIcon(size) {
+            const canvas = document.createElement('canvas');
+            drawIcon(canvas, size);
+            
+            // Создаем ссылку для скачивания
+            canvas.toBlob(function(blob) {
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `avesta-icon-${size}x${size}.png`;
+                a.textContent = `Скачать ${size}x${size}`;
+                a.style.display = 'block';
+                a.style.margin = '5px 0';
+                
+                const downloads = document.getElementById('downloads');
+                downloads.appendChild(a);
+                
+                // Автоматическое скачивание
+                a.click();
+            });
+        }
+        
+        // Показываем предварительный просмотр
+        window.onload = function() {
+            const preview = document.getElementById('preview');
+            drawIcon(preview, 512);
+        };
+    </script>
+</body>
+</html>

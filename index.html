@@ -613,8 +613,8 @@
                         <p class="text-2xl font-bold text-blue-600" id="totalBalance">0</p>
                     </div>
                     <div class="bg-white p-6 rounded-lg shadow">
-                        <h3 class="text-lg font-semibold mb-2">Долги</h3>
-                        <p class="text-2xl font-bold text-orange-600" id="totalDebt">0</p>
+                        <h3 class="text-lg font-semibold mb-2">💰 Долги (сомони)</h3>
+                        <p class="text-2xl font-bold text-orange-600 font-mono" id="totalDebt">0</p>
                     </div>
                 </div>
 
@@ -1204,9 +1204,9 @@
                         <thead class="bg-gray-50">
                             <tr>
                                 <th class="p-3 text-left">Клиент</th>
-                                <th class="p-3 text-left">Общая задолженность</th>
-                                <th class="p-3 text-left">Погашено</th>
-                                <th class="p-3 text-left">Остаток долга</th>
+                                <th class="p-3 text-right">Общая задолженность</th>
+                                <th class="p-3 text-right">Погашено</th>
+                                <th class="p-3 text-right">Остаток долга</th>
                             </tr>
                         </thead>
                         <tbody id="debtReportTableBody">
@@ -1214,15 +1214,30 @@
                     </table>
                 </div>
                 <div class="mt-4 p-4 bg-blue-50 rounded">
-                    <h3 class="font-semibold mb-2">Итоги для информации:</h3>
-                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                        <div>Общая задолженность: <span id="totalDebtSum">0</span></div>
-                        <div>Всего погашено: <span id="totalPaidSum">0</span></div>
-                        <div class="text-green-600">Переплаты: <span id="totalOverpayment">0</span></div>
-                        <div class="text-red-600">Долги: <span id="totalDebts">0</span></div>
+                    <h3 class="font-semibold mb-2">💰 Итоги для информации:</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <div class="bg-white p-3 rounded shadow-sm">
+                            <div class="text-sm text-gray-600">Общая задолженность:</div>
+                            <div class="text-lg font-bold text-blue-600 font-mono" id="totalDebtSum">0</div>
+                        </div>
+                        <div class="bg-white p-3 rounded shadow-sm">
+                            <div class="text-sm text-gray-600">Всего погашено:</div>
+                            <div class="text-lg font-bold text-blue-600 font-mono" id="totalPaidSum">0</div>
+                        </div>
+                        <div class="bg-white p-3 rounded shadow-sm">
+                            <div class="text-sm text-gray-600">Переплаты:</div>
+                            <div class="text-lg font-bold text-green-600 font-mono" id="totalOverpayment">0</div>
+                        </div>
+                        <div class="bg-white p-3 rounded shadow-sm">
+                            <div class="text-sm text-gray-600">Долги:</div>
+                            <div class="text-lg font-bold text-red-600 font-mono" id="totalDebts">0</div>
+                        </div>
                     </div>
-                    <div class="mt-2 pt-2 border-t">
-                        <div class="font-semibold">Итоговый баланс: <span id="totalDebtAmount" class="text-lg">0</span>
+                    <div class="mt-4 pt-4 border-t bg-white p-4 rounded shadow-sm">
+                        <div class="text-center">
+                            <div class="text-sm text-gray-600 mb-1">Итоговый баланс:</div>
+                            <div class="text-2xl font-bold font-mono" id="totalDebtAmount">0</div>
+                            <div class="text-xs text-gray-500 mt-1">Положительное значение = переплата, отрицательное = долг</div>
                         </div>
                     </div>
                 </div>
@@ -3697,6 +3712,33 @@
         // Дублированная функция switchYear удалена - используется основная выше
 
 
+
+        // Функция для форматирования денежных сумм
+        function formatMoney(amount) {
+            if (typeof amount !== 'number') {
+                amount = parseFloat(amount) || 0;
+            }
+            
+            // Форматируем с разделителями тысяч и 2 знаками после запятой
+            return new Intl.NumberFormat('ru-RU', {
+                style: 'currency',
+                currency: 'TJS',
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            }).format(amount);
+        }
+
+        // Альтернативная функция без символа валюты
+        function formatNumber(amount) {
+            if (typeof amount !== 'number') {
+                amount = parseFloat(amount) || 0;
+            }
+            
+            return new Intl.NumberFormat('ru-RU', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            }).format(amount);
+        }
 
         // Функция для получения данных текущего года
         function getCurrentYearData() {
@@ -6879,21 +6921,21 @@
                 }
 
                 tbody.innerHTML += `
-                    <tr>
-                        <td class="p-3">${client}</td>
-                        <td class="p-3">${debt.total.toFixed(2)}</td>
-                        <td class="p-3">${debt.paid.toFixed(2)}</td>
-                        <td class="p-3 ${remaining >= 0 ? 'text-green-600' : 'text-red-600'}">${remaining.toFixed(2)}</td>
+                    <tr class="hover:bg-gray-50">
+                        <td class="p-3 font-medium">${client}</td>
+                        <td class="p-3 font-mono text-right">${formatNumber(debt.total)}</td>
+                        <td class="p-3 font-mono text-right">${formatNumber(debt.paid)}</td>
+                        <td class="p-3 font-mono text-right font-bold ${remaining >= 0 ? 'text-green-600' : 'text-red-600'}">${remaining >= 0 ? '+' : ''}${formatNumber(remaining)}</td>
                     </tr>
                 `;
             });
 
-            // Обновляем все итоги
-            document.getElementById('totalDebtSum').textContent = totalDebtSum.toFixed(2);
-            document.getElementById('totalPaidSum').textContent = totalPaidSum.toFixed(2);
-            document.getElementById('totalOverpayment').textContent = totalOverpayment.toFixed(2);
-            document.getElementById('totalDebts').textContent = totalDebts.toFixed(2);
-            document.getElementById('totalDebtAmount').textContent = totalDebtAmount.toFixed(2);
+            // Обновляем все итоги с денежным форматированием
+            document.getElementById('totalDebtSum').textContent = formatNumber(totalDebtSum);
+            document.getElementById('totalPaidSum').textContent = formatNumber(totalPaidSum);
+            document.getElementById('totalOverpayment').textContent = formatNumber(totalOverpayment);
+            document.getElementById('totalDebts').textContent = formatNumber(totalDebts);
+            document.getElementById('totalDebtAmount').textContent = formatNumber(totalDebtAmount);
         }
 
         function updateWagonTotals() {
@@ -7032,10 +7074,10 @@
             const totalBalanceEl = document.getElementById('totalBalance');
             const totalDebtEl = document.getElementById('totalDebt');
 
-            if (totalIncomeEl) totalIncomeEl.textContent = totalIncome;
-            if (totalExpenseEl) totalExpenseEl.textContent = totalExpense;
-            if (totalBalanceEl) totalBalanceEl.textContent = totalBalance;
-            if (totalDebtEl) totalDebtEl.textContent = totalDebt.toFixed(2);
+            if (totalIncomeEl) totalIncomeEl.textContent = totalIncome + ' шт';
+            if (totalExpenseEl) totalExpenseEl.textContent = totalExpense + ' шт';
+            if (totalBalanceEl) totalBalanceEl.textContent = totalBalance + ' шт';
+            if (totalDebtEl) totalDebtEl.textContent = formatNumber(totalDebt);
 
             // Обновляем информацию о ценах на Dashboard
             updateDashboardPrices();

@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Тест входа</title>
+</head>
+<body>
+    <h1>Тест системы входа</h1>
+    
+    <div>
+        <label>Логин: <input type="text" id="username" value="admin"></label><br>
+        <label>Пароль: <input type="password" id="password" value="P0l1uret@n@"></label><br>
+        <button onclick="testLogin()">Войти</button>
+    </div>
+    
+    <div id="result" style="margin-top: 20px; padding: 10px; border: 1px solid #ccc;"></div>
+    
+    <script>
+        // Данные по умолчанию
+        const appData = {
+            users: [
+                { username: 'admin', password: 'P0l1uret@n@', role: 'admin' }
+            ]
+        };
+        
+        // Функция хэширования
+        async function hashPassword(password) {
+            const encoder = new TextEncoder();
+            const data = encoder.encode(password);
+            const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+            return hashHex;
+        }
+        
+        // Функция проверки пароля
+        async function verifyPassword(inputPassword, storedPassword) {
+            console.log('🔐 Проверка пароля...');
+            console.log('Введенный:', inputPassword);
+            console.log('Сохраненный:', storedPassword);
+            console.log('Длина сохраненного:', storedPassword.length);
+            
+            // Если пароль уже хэширован (64 символа hex)
+            if (storedPassword.length === 64 && /^[a-f0-9]+$/.test(storedPassword)) {
+                console.log('✅ Формат: Хэшированный');
+                const inputHash = await hashPassword(inputPassword);
+                console.log('Хэш введенного:', inputHash);
+                return inputHash === storedPassword;
+            }
+            
+            // Старый формат - прямое сравнение
+            console.log('✅ Формат: Открытый текст');
+            const result = inputPassword === storedPassword;
+            console.log('Результат сравнения:', result);
+            return result;
+        }
+        
+        // Тест входа
+        async function testLogin() {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = '<p>⏳ Проверка...</p>';
+            
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            
+            console.log('🔐 Попытка входа:', username);
+            console.log('📊 Всего пользователей:', appData.users.length);
+            
+            const user = appData.users.find(u => u.username === username);
+            
+            if (!user) {
+                console.log('❌ Пользователь не найден');
+                resultDiv.innerHTML = '<p style="color: red;">❌ Пользователь не найден</p>';
+                return;
+            }
+            
+            console.log('✅ Пользователь найден:', user);
+            
+            // Проверка Crypto API
+            if (typeof crypto === 'undefined' || typeof crypto.subtle === 'undefined') {
+                console.error('❌ Crypto API недоступен!');
+                resultDiv.innerHTML = '<p style="color: red;">❌ Crypto API недоступен! Нужен HTTPS.</p>';
+                return;
+            }
+            
+            console.log('✅ Crypto API доступен');
+            
+            // Проверяем пароль
+            const passwordValid = await verifyPassword(password, user.password);
+            
+            console.log('🔐 Результат проверки:', passwordValid);
+            
+            if (passwordValid) {
+                resultDiv.innerHTML = `
+                    <p style="color: green;">✅ Вход успешен!</p>
+                    <p>Пользователь: ${user.username}</p>
+                    <p>Роль: ${user.role}</p>
+                `;
+            } else {
+                resultDiv.innerHTML = '<p style="color: red;">❌ Неверный пароль</p>';
+            }
+        }
+        
+        // Автоматический тест при загрузке
+        window.addEventListener('load', () => {
+            console.log('🚀 Страница загружена');
+            console.log('🔐 Crypto API:', typeof crypto !== 'undefined' ? '✅ Доступен' : '❌ Недоступен');
+            console.log('🔐 SubtleCrypto:', typeof crypto.subtle !== 'undefined' ? '✅ Доступен' : '❌ Недоступен');
+            console.log('📊 Данные:', appData);
+            console.log('👥 Пользователи:', appData.users);
+        });
+    </script>
+</body>
+</html>

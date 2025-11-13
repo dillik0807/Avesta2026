@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тест синхронизации в реальном времени</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getDatabase, ref, set, get, onValue, push } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
+        import { getAuth, signInAnonymously } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCayEVi5NeiLKd9Q_c_-NUSvl8PIrd3aRU",
+            authDomain: "warehouse-system-f4e52.firebaseapp.com",
+            databaseURL: "https://warehouse-system-f4e52-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "warehouse-system-f4e52",
+            storageBucket: "warehouse-system-f4e52.firebasestorage.app",
+            messagingSenderId: "660222070151",
+            appId: "1:660222070151:web:abebee403e889d2de19722"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+        const auth = getAuth(app);
+
+        window.firebaseDB = database;
+        window.firebaseAuth = auth;
+        window.firebaseRefs = { ref, set, get, onValue, push };
+        window.signInAnonymously = signInAnonymously;
+    </script>
+</head>
+<body class="bg-gray-100 min-h-screen p-8">
+    <div class="max-w-4xl mx-auto">
+        <div class="bg-white rounded-lg shadow-lg p-6 mb-6">
+            <h1 class="text-3xl font-bold text-blue-600 mb-4">🔄 Тест синхронизации в реальном времени</h1>
+            
+            <div class="flex items-center gap-3 mb-4">
+                <div id="statusIndicator" class="w-4 h-4 bg-gray-400 rounded-full"></div>
+                <span id="statusText" class="text-lg font-semibold">Подключение...</span>
+            </div>
+
+            <div class="bg-blue-50 border-l-4 border-blue-500 p-4 mb-6">
+                <p class="text-sm text-blue-700">
+                    <strong>Инструкция:</strong> Откройте эту страницу в двух разных браузерах или вкладках.
+                    Добавьте сообщение в одном - оно появится в другом через 1-2 секунды!
+                </p>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-lg shadow-lg p-6 mb-6">
+            <h2 class="text-xl font-bold mb-4">📝 Добавить сообщение</h2>
+            
+            <div class="flex gap-2">
+                <input 
+                    type="text" 
+                    id="messageInput" 
+                    placeholder="Введите сообщение..."
+                    class="flex-1 px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+                <button 
+                    id="sendBtn"
+                    class="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 transition"
+                >
+                    Отправить
+                </button>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-lg shadow-lg p-6">
+            <h2 class="text-xl font-bold mb-4">💬 Сообщения (обновляются в реальном времени)</h2>
+            
+            <div id="messagesList" class="space-y-2">
+                <p class="text-gray-500 text-center py-8">Сообщений пока нет...</p>
+            </div>
+        </div>
+
+        <div class="mt-6 bg-green-50 border-l-4 border-green-500 p-4">
+            <h3 class="font-bold text-green-800 mb-2">✅ Что проверяем:</h3>
+            <ul class="text-sm text-green-700 space-y-1">
+                <li>• Автоматическое подключение к Firebase</li>
+                <li>• Отправку данных в облако</li>
+                <li>• Получение обновлений в реальном времени</li>
+                <li>• Синхронизацию между несколькими пользователями</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        let isConnected = false;
+        let listener = null;
+
+        // Обновление статуса
+        function updateStatus(status, text) {
+            const indicator = document.getElementById('statusIndicator');
+            const statusText = document.getElementById('statusText');
+            
+            statusText.textContent = text;
+            
+            if (status === 'connected') {
+                indicator.className = 'w-4 h-4 bg-green-500 rounded-full animate-pulse';
+            } else if (status === 'syncing') {
+                indicator.className = 'w-4 h-4 bg-yellow-500 rounded-full animate-spin';
+            } else {
+                indicator.className = 'w-4 h-4 bg-red-500 rounded-full';
+            }
+        }
+
+        // Инициализация
+        async function initialize() {
+            try {
+                console.log('🔄 Инициализация...');
+                updateStatus('syncing', 'Подключение к Firebase...');
+
+                // Ждем загрузки Firebase SDK
+                await new Promise(resolve => setTimeout(resolve, 1000));
+
+                if (!window.firebaseDB || !window.firebaseRefs) {
+                    throw new Error('Firebase SDK не загружен');
+                }
+
+                // Авторизация
+                console.log('🔐 Авторизация...');
+                await window.signInAnonymously(window.firebaseAuth);
+                console.log('✅ Авторизация успешна');
+
+                // Настройка слушателя
+                const { ref, onValue } = window.firebaseRefs;
+                const messagesRef = ref(window.firebaseDB, 'testMessages');
+
+                listener = onValue(messagesRef, (snapshot) => {
+                    console.log('🔔 Получено обновление');
+                    if (snapshot.exists()) {
+                        const messages = snapshot.val();
+                        displayMessages(messages);
+                    } else {
+                        displayMessages({});
+                    }
+                });
+
+                isConnected = true;
+                updateStatus('connected', '✅ Подключено - синхронизация активна');
+                console.log('✅ Инициализация завершена');
+
+            } catch (error) {
+                console.error('❌ Ошибка:', error);
+                updateStatus('error', '❌ Ошибка подключения');
+                alert('Ошибка подключения: ' + error.message);
+            }
+        }
+
+        // Отображение сообщений
+        function displayMessages(messages) {
+            const messagesList = document.getElementById('messagesList');
+            
+            if (!messages || Object.keys(messages).length === 0) {
+                messagesList.innerHTML = '<p class="text-gray-500 text-center py-8">Сообщений пока нет...</p>';
+                return;
+            }
+
+            const messagesArray = Object.entries(messages).map(([id, msg]) => ({
+                id,
+                ...msg
+            })).sort((a, b) => b.timestamp - a.timestamp);
+
+            messagesList.innerHTML = messagesArray.map(msg => `
+                <div class="bg-gray-50 p-4 rounded border border-gray-200">
+                    <div class="flex justify-between items-start mb-2">
+                        <span class="font-semibold text-gray-800">${msg.text}</span>
+                        <span class="text-xs text-gray-500">${new Date(msg.timestamp).toLocaleString('ru-RU')}</span>
+                    </div>
+                    <div class="text-xs text-gray-500">
+                        ID: ${msg.userId.substring(0, 8)}...
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Отправка сообщения
+        async function sendMessage() {
+            if (!isConnected) {
+                alert('Сначала подключитесь к Firebase');
+                return;
+            }
+
+            const input = document.getElementById('messageInput');
+            const text = input.value.trim();
+
+            if (!text) {
+                alert('Введите сообщение');
+                return;
+            }
+
+            try {
+                updateStatus('syncing', 'Отправка...');
+
+                const { ref, push } = window.firebaseRefs;
+                const messagesRef = ref(window.firebaseDB, 'testMessages');
+
+                const user = window.firebaseAuth.currentUser;
+                const message = {
+                    text: text,
+                    timestamp: Date.now(),
+                    userId: user.uid
+                };
+
+                await push(messagesRef, message);
+
+                input.value = '';
+                updateStatus('connected', '✅ Подключено - синхронизация активна');
+                console.log('✅ Сообщение отправлено');
+
+            } catch (error) {
+                console.error('❌ Ошибка отправки:', error);
+                updateStatus('error', '❌ Ошибка отправки');
+                alert('Ошибка отправки: ' + error.message);
+            }
+        }
+
+        // Обработчики событий
+        document.getElementById('sendBtn').addEventListener('click', sendMessage);
+        document.getElementById('messageInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+
+        // Запуск при загрузке
+        window.addEventListener('load', () => {
+            setTimeout(initialize, 2000);
+        });
+    </script>
+</body>
+</html>

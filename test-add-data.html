@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тест добавления данных</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+        .test-section {
+            background: #f5f5f5;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+        button {
+            background: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #45a049;
+        }
+        .log {
+            background: #fff;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            max-height: 400px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        .success { color: green; }
+        .error { color: red; }
+        .info { color: blue; }
+    </style>
+</head>
+<body>
+    <h1>🧪 Тест добавления данных</h1>
+    
+    <div class="test-section">
+        <h2>Тест генерации ID</h2>
+        <button onclick="testIdGeneration()">Тест 1: Генерация 10 ID</button>
+        <button onclick="testFastIdGeneration()">Тест 2: Быстрая генерация 100 ID</button>
+        <button onclick="clearLog()">Очистить лог</button>
+        <div id="log" class="log"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Проверка localStorage</h2>
+        <button onclick="checkLocalStorage()">Проверить данные</button>
+        <button onclick="clearLocalStorage()">Очистить localStorage</button>
+        <div id="storageLog" class="log"></div>
+    </div>
+
+    <script>
+        // Копия функции generateUniqueId из проекта
+        let lastGeneratedId = 0;
+        function generateUniqueId() {
+            const now = Date.now();
+            if (now <= lastGeneratedId) {
+                lastGeneratedId = lastGeneratedId + 1;
+            } else {
+                lastGeneratedId = now;
+            }
+            return lastGeneratedId;
+        }
+
+        function log(message, type = 'info') {
+            const logDiv = document.getElementById('log');
+            const time = new Date().toLocaleTimeString();
+            const className = type;
+            logDiv.innerHTML += `<div class="${className}">[${time}] ${message}</div>`;
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+
+        function storageLog(message, type = 'info') {
+            const logDiv = document.getElementById('storageLog');
+            const time = new Date().toLocaleTimeString();
+            const className = type;
+            logDiv.innerHTML += `<div class="${className}">[${time}] ${message}</div>`;
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+
+        function clearLog() {
+            document.getElementById('log').innerHTML = '';
+        }
+
+        function testIdGeneration() {
+            clearLog();
+            log('🧪 Тест 1: Генерация 10 ID', 'info');
+            log('─'.repeat(50), 'info');
+            
+            const ids = [];
+            for (let i = 0; i < 10; i++) {
+                const id = generateUniqueId();
+                ids.push(id);
+                log(`ID ${i + 1}: ${id}`, 'success');
+            }
+            
+            // Проверка уникальности
+            const uniqueIds = new Set(ids);
+            if (uniqueIds.size === ids.length) {
+                log('✅ Все ID уникальные!', 'success');
+            } else {
+                log(`❌ Найдены дубликаты! Уникальных: ${uniqueIds.size}, Всего: ${ids.length}`, 'error');
+            }
+        }
+
+        function testFastIdGeneration() {
+            clearLog();
+            log('🧪 Тест 2: Быстрая генерация 100 ID', 'info');
+            log('─'.repeat(50), 'info');
+            
+            const startTime = performance.now();
+            const ids = [];
+            
+            for (let i = 0; i < 100; i++) {
+                const id = generateUniqueId();
+                ids.push(id);
+            }
+            
+            const endTime = performance.now();
+            const duration = (endTime - startTime).toFixed(2);
+            
+            log(`Сгенерировано: ${ids.length} ID`, 'info');
+            log(`Время: ${duration} мс`, 'info');
+            log(`Первый ID: ${ids[0]}`, 'info');
+            log(`Последний ID: ${ids[ids.length - 1]}`, 'info');
+            
+            // Проверка уникальности
+            const uniqueIds = new Set(ids);
+            if (uniqueIds.size === ids.length) {
+                log('✅ Все 100 ID уникальные!', 'success');
+            } else {
+                log(`❌ Найдены дубликаты! Уникальных: ${uniqueIds.size}, Всего: ${ids.length}`, 'error');
+                
+                // Найти дубликаты
+                const duplicates = ids.filter((id, index) => ids.indexOf(id) !== index);
+                log(`Дубликаты: ${duplicates.join(', ')}`, 'error');
+            }
+        }
+
+        function checkLocalStorage() {
+            document.getElementById('storageLog').innerHTML = '';
+            storageLog('🔍 Проверка localStorage', 'info');
+            storageLog('─'.repeat(50), 'info');
+            
+            const data = localStorage.getItem('retailAppData');
+            if (!data) {
+                storageLog('❌ Данные не найдены в localStorage', 'error');
+                return;
+            }
+            
+            try {
+                const appData = JSON.parse(data);
+                storageLog('✅ Данные найдены', 'success');
+                storageLog(`Размер: ${data.length} символов`, 'info');
+                
+                if (appData.years) {
+                    storageLog(`Годы: ${Object.keys(appData.years).join(', ')}`, 'info');
+                    
+                    for (const year in appData.years) {
+                        const yearData = appData.years[year];
+                        storageLog(`\nГод ${year}:`, 'info');
+                        storageLog(`  Приход: ${yearData.income?.length || 0} записей`, 'success');
+                        storageLog(`  Расход: ${yearData.expense?.length || 0} записей`, 'success');
+                        storageLog(`  Погашения: ${yearData.payments?.length || 0} записей`, 'success');
+                        
+                        // Проверка уникальности ID в приходе
+                        if (yearData.income && yearData.income.length > 0) {
+                            const incomeIds = yearData.income.map(i => i.id);
+                            const uniqueIncomeIds = new Set(incomeIds);
+                            if (uniqueIncomeIds.size !== incomeIds.length) {
+                                storageLog(`  ⚠️ Приход: найдены дубликаты ID!`, 'error');
+                            }
+                        }
+                        
+                        // Проверка уникальности ID в расходе
+                        if (yearData.expense && yearData.expense.length > 0) {
+                            const expenseIds = yearData.expense.map(e => e.id);
+                            const uniqueExpenseIds = new Set(expenseIds);
+                            if (uniqueExpenseIds.size !== expenseIds.length) {
+                                storageLog(`  ⚠️ Расход: найдены дубликаты ID!`, 'error');
+                            }
+                        }
+                        
+                        // Проверка уникальности ID в погашениях
+                        if (yearData.payments && yearData.payments.length > 0) {
+                            const paymentIds = yearData.payments.map(p => p.id);
+                            const uniquePaymentIds = new Set(paymentIds);
+                            if (uniquePaymentIds.size !== paymentIds.length) {
+                                storageLog(`  ⚠️ Погашения: найдены дубликаты ID!`, 'error');
+                            }
+                        }
+                    }
+                }
+            } catch (error) {
+                storageLog(`❌ Ошибка парсинга: ${error.message}`, 'error');
+            }
+        }
+
+        function clearLocalStorage() {
+            if (confirm('Вы уверены? Это удалит ВСЕ данные!')) {
+                localStorage.removeItem('retailAppData');
+                document.getElementById('storageLog').innerHTML = '';
+                storageLog('✅ localStorage очищен', 'success');
+            }
+        }
+
+        // Автоматический тест при загрузке
+        window.onload = function() {
+            log('🚀 Страница загружена. Готов к тестированию.', 'info');
+        };
+    </script>
+</body>
+</html>

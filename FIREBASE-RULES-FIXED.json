@@ -1,0 +1,64 @@
+{
+  "rules": {
+    ".read": "auth != null",
+    ".write": false,
+    
+    "users": {
+      ".read": "auth != null",
+      ".write": "auth != null"
+    },
+    
+    "years": {
+      "$year": {
+        ".read": "auth != null",
+        
+        "income": {
+          ".write": "auth != null"
+        },
+        
+        "expense": {
+          ".write": "auth != null"
+        },
+        
+        "payments": {
+          ".write": "auth != null"
+        }
+      }
+    },
+    
+    "companies": {
+      ".read": "auth != null",
+      ".write": "auth != null"
+    },
+    
+    "products": {
+      ".read": "auth != null",
+      ".write": "auth != null"
+    },
+    
+    "warehouses": {
+      ".read": "auth != null",
+      ".write": "auth != null"
+    },
+    
+    "warehouseGroups": {
+      ".read": "auth != null",
+      ".write": "auth != null"
+    },
+    
+    "clients": {
+      ".read": "auth != null",
+      ".write": "auth != null"
+    },
+    
+    "prices": {
+      ".read": "auth != null",
+      ".write": "auth != null"
+    },
+    
+    "coalitions": {
+      ".read": "auth != null",
+      ".write": "auth != null"
+    }
+  }
+}

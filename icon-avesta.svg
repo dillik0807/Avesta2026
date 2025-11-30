@@ -1,0 +1,58 @@
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- Золотой градиент -->
+    <linearGradient id="goldGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FFD700;stop-opacity:1" />
+      <stop offset="25%" style="stop-color:#FFA500;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#FFD700;stop-opacity:1" />
+      <stop offset="75%" style="stop-color:#B8860B;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#DAA520;stop-opacity:1" />
+    </linearGradient>
+    
+    <!-- Темно-синий градиент для фона -->
+    <radialGradient id="backgroundGradient" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" style="stop-color:#1e40af;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#0f172a;stop-opacity:1" />
+    </radialGradient>
+    
+    <!-- Тень для текста -->
+    <filter id="textShadow">
+      <feDropShadow dx="2" dy="2" stdDeviation="3" flood-color="#000000" flood-opacity="0.3"/>
+    </filter>
+  </defs>
+  
+  <!-- Фон -->
+  <rect width="512" height="512" rx="64" fill="url(#backgroundGradient)"/>
+  
+  <!-- Декоративная рамка -->
+  <rect x="32" y="32" width="448" height="448" rx="32" fill="none" stroke="url(#goldGradient)" stroke-width="4"/>
+  
+  <!-- Основной текст "Avesta" -->
+  <text x="256" y="280" 
+        text-anchor="middle" 
+        fill="url(#goldGradient)" 
+        font-family="Arial Black, Arial, sans-serif" 
+        font-size="64" 
+        font-weight="900"
+        filter="url(#textShadow)">Avesta</text>
+  
+  <!-- Подзаголовок "2026" -->
+  <text x="256" y="340" 
+        text-anchor="middle" 
+        fill="url(#goldGradient)" 
+        font-family="Arial, sans-serif" 
+        font-size="32" 
+        font-weight="bold"
+        opacity="0.8">2026</text>
+  
+  <!-- Декоративные элементы -->
+  <circle cx="128" cy="128" r="8" fill="url(#goldGradient)" opacity="0.6"/>
+  <circle cx="384" cy="128" r="8" fill="url(#goldGradient)" opacity="0.6"/>
+  <circle cx="128" cy="384" r="8" fill="url(#goldGradient)" opacity="0.6"/>
+  <circle cx="384" cy="384" r="8" fill="url(#goldGradient)" opacity="0.6"/>
+  
+  <!-- Центральная звезда -->
+  <polygon points="256,80 264,104 288,104 270,120 278,144 256,128 234,144 242,120 224,104 248,104" 
+           fill="url(#goldGradient)" 
+           opacity="0.7"/>
+</svg>

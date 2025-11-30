@@ -1,0 +1,52 @@
+{
+  "name": "avesta2026",
+  "version": "1.0.0",
+  "description": "Avesta2026 - Система учёта товаров",
+  "main": "index.js",
+  "scripts": {
+    "build": "npm run copy-files",
+    "copy-files": "if not exist www mkdir www && copy index.html www\\index.html && xcopy /E /I /Y assets www\\assets 2>nul || echo Files copied",
+    "dev": "npm run copy-files && npx cap run android --livereload",
+    "dev:ios": "npm run copy-files && npx cap run ios --livereload",
+    "build:ios": "npm run copy-files && npx cap sync ios",
+    "android": "npm run build && npx cap sync android && npx cap run android",
+    "ios": "npm run build && npx cap sync ios && npx cap run ios",
+    "sync": "npx cap sync",
+    "sync:android": "npx cap sync android",
+    "sync:ios": "npx cap sync ios",
+    "add:android": "npx cap add android",
+    "add:ios": "npx cap add ios",
+    "open:android": "npx cap open android",
+    "open:ios": "npx cap open ios",
+    "clean": "npx cap clean",
+    "doctor": "npx cap doctor"
+  },
+  "keywords": [
+    "warehouse",
+    "inventory",
+    "mobile",
+    "capacitor",
+    "android",
+    "ios"
+  ],
+  "author": "Avesta2026 Team",
+  "license": "MIT",
+  "devDependencies": {
+    "@capacitor/cli": "^5.5.1",
+    "typescript": "^5.9.3"
+  },
+  "dependencies": {
+    "@capacitor/android": "^5.5.1",
+    "@capacitor/app": "^5.0.6",
+    "@capacitor/core": "^5.5.1",
+    "@capacitor/device": "^5.0.6",
+    "@capacitor/haptics": "^5.0.6",
+    "@capacitor/ios": "^5.5.1",
+    "@capacitor/keyboard": "^5.0.6",
+    "@capacitor/network": "^5.0.6",
+    "@capacitor/preferences": "^5.0.6",
+    "@capacitor/splash-screen": "^5.0.6",
+    "@capacitor/status-bar": "^5.0.6",
+    "@capacitor/toast": "^5.0.6"
+  }
+}
